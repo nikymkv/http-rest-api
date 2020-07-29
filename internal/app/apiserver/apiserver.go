@@ -93,7 +93,13 @@ func (s *APIServer) handleUsersCreate() http.HandlerFunc {
 			Email:    req.Email,
 			Password: req.Password,
 		}
-		if _, err := s.store.User().Create(context.TODO(), u); err != nil {
+		if id, err := s.store.User().Create(context.TODO(), u); err != nil {
+			s.error(w, r, http.StatusUnprocessableEntity, err)
+			return
+		}
+		
+		u.ID, err = primitive.ObjectIDFromHex(id)
+		if err != nil {
 			s.error(w, r, http.StatusUnprocessableEntity, err)
 			return
 		}
